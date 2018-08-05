@@ -15,6 +15,14 @@ n_col<-ncol(bin)
 # probability of of having target = 1
 p_tar_1<-length(bin[bin[,"target"]==1,"target"])/n_row
 
+# text content
+csv<-data.frame(matrix(nrow = 17,ncol = 5))
+colnames(csv)<-c("attribute",
+                 "null hypothesis (case 0)",
+                 "null hypothesis (case 1)",
+                 "P(target = 1), case 0",
+                 "P(target = 1), case 1")
+
 for(i in 1:(n_col-1)){
   
   # number of binary 0 cases
@@ -60,18 +68,18 @@ for(i in 1:(n_col-1)){
   upper_bin_1<-point_est_bin_1 + margin_bin_1
   
   # indicator for probability 
-  prob_bin_0<-ifelse(p_tar_1_bin_0>p_tar_1,"higher","lower")
-  prob_bin_1<-ifelse(p_tar_1_bin_1>p_tar_1,"higher","lower")
+  prob_bin_0<-ifelse(p_tar_1_bin_0>p_tar_1,"increasing","decreasing")
+  prob_bin_1<-ifelse(p_tar_1_bin_1>p_tar_1,"increasing","decreasing")
   
-  # testing null hypothesis for binary 0 and 1 cases
-  print(cat(colnames(bin)[i],
-            paste("- binary 0 case, 95% of confidence - null hypothesis rejected = ",
-              !(lower_bin_0<0 & upper_bin_0>0),
-              ",  probability of target = 1 is ",
-              prob_bin_0),
-            paste("- binary 1 case, 95% of confidence - null hypothesis rejected = ",
-              !(lower_bin_1<0 & upper_bin_1>0),
-              ",  probability of target = 1 is ",
-              prob_bin_1),
-              sep = "\n"))
+  # preparing csv data for binary 0 and 1 cases
+  csv[i,"attribute"]<-colnames(bin)[i]
+  
+  csv[i,"null hypothesis (case 0)"]<-ifelse((lower_bin_0<0 & upper_bin_0>0),"accepted","rejected")
+  csv[i,"null hypothesis (case 1)"]<-ifelse((lower_bin_1<0 & upper_bin_1>0),"accepted","rejected")
+  
+  csv[i,"P(target = 1), case 0"]<-prob_bin_0
+  csv[i,"P(target = 1), case 1"]<-prob_bin_1
 }
+# writing to the file
+write.csv(csv,"exploratory_bin_attr.csv")
+
